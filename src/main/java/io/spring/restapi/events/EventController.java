@@ -30,7 +30,7 @@ public class EventController {
   public ResponseEntity createEvent(@RequestBody @Valid EventDto eventDto, Errors errors) {
     if (errors.hasErrors() || !eventValidator.validate(eventDto, errors)) {
       errors.getAllErrors().forEach(e -> log.error("{} : {}", e.getCode(), e.getDefaultMessage()));
-      return ResponseEntity.badRequest().build();
+      return ResponseEntity.badRequest().body(errors);
     }
 
     Event event = modelMapper.map(eventDto, Event.class);
