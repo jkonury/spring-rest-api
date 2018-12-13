@@ -27,4 +27,16 @@ public class EventTest {
     assertThat(event.getName()).isEqualTo(name);
     assertThat(event.getDescription()).isEqualTo(description);
   }
+
+  @Test
+  public void testFree() {
+    Event event = Event.builder()
+      .basePrice(0)
+      .maxPrice(0)
+      .build();
+
+    event.update();
+
+    assertThat(event.isFree()).isTrue();
+  }
 }
