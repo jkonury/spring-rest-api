@@ -10,6 +10,10 @@ buildscript {
   }
 }
 
+plugins {
+  id "org.asciidoctor.convert" version "1.5.3"
+}
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
@@ -37,4 +41,19 @@ dependencies {
   testImplementation('org.springframework.boot:spring-boot-starter-test')
   testImplementation('org.springframework.restdocs:spring-restdocs-mockmvc')
   testImplementation 'pl.pragmatists:JUnitParams:1.1.1'
+
+  asciidoctor 'org.springframework.restdocs:spring-restdocs-asciidoctor:2.0.2.RELEASE'
+}
+
+ext {
+  snippetsDir = file('build/generated-snippets')
+}
+
+test {
+  outputs.dir snippetsDir
+}
+
+asciidoctor {
+  inputs.dir snippetsDir
+  dependsOn test
 }
