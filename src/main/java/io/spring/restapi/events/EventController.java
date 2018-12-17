@@ -1,7 +1,6 @@
 package io.spring.restapi.events;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 import java.net.URI;
 import javax.validation.Valid;
@@ -9,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,8 +36,13 @@ public class EventController {
     Event event = modelMapper.map(eventDto, Event.class);
     event.update();
     Event newEvent = eventRepository.save(event);
-    final URI createUri = linkTo(EventController.class).slash(newEvent.getId()).toUri();
+    final ControllerLinkBuilder selfLinkBuilder = linkTo(EventController.class).slash(newEvent.getId());
+    final URI createUri = selfLinkBuilder.toUri();
 
-    return ResponseEntity.created(createUri).body(event);
+    final EventResource eventResource = new EventResource(event);
+    eventResource.add(linkTo(EventController.class).withRel("query-events"));
+    eventResource.add(selfLinkBuilder.withRel("update-event"));
+
+    return ResponseEntity.created(createUri).body(eventResource);
   }
 }
