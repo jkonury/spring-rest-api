@@ -11,6 +11,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.requestF
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -24,6 +25,7 @@ import java.util.stream.IntStream;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -52,6 +54,9 @@ public class EventControllerTest {
 
   @Autowired
   EventRepository eventRepository;
+
+  @Autowired
+  ModelMapper modelMapper;
 
   @Test
   public void createNullEvent() throws Exception {
@@ -255,10 +260,53 @@ public class EventControllerTest {
         .andExpect(jsonPath("_links.profile").exists());
   }
 
+  @Test
+  @TestDescription("이벤트 수정하기")
+  public void updateEvent() throws Exception {
+    // given
+    Event event = generateEvent(100);
+
+    EventDto eventDto = modelMapper.map(event, EventDto.class);
+    eventDto.setName("Update Event");
+
+    // when & then
+    mockMvc.perform(get("/api/events/{id}", event.getId()))
+        .andDo(print())
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("name").exists())
+        .andExpect(jsonPath("id").exists())
+        .andExpect(jsonPath("_links.self").exists())
+        .andExpect(jsonPath("_links.profile").exists());
+
+    mockMvc.perform(put("/api/events/{id}", event.getId())
+        .contentType(MediaType.APPLICATION_JSON_UTF8)
+        .accept(MediaTypes.HAL_JSON)
+        .content(objectMapper.writeValueAsString(eventDto)))
+        .andDo(print())
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("name").exists())
+        .andExpect(jsonPath("id").exists())
+        .andExpect(jsonPath("_links.self").exists())
+        .andExpect(jsonPath("_links.profile").exists())
+        .andDo(document("update-event"))
+    ;
+  }
+
   private Event generateEvent(int index) {
     Event event = Event.builder()
         .name("event " + index)
         .description("test event")
+        .beginEnrollmentDateTime(LocalDateTime.of(2018, 11, 23, 14, 21))
+        .closeEnrollmentDateTime(LocalDateTime.of(2018, 11, 24, 14, 21))
+        .beginEventDateTime(LocalDateTime.of(2018, 11, 25, 14, 21))
+        .endEventDateTime(LocalDateTime.of(2018, 11, 26, 14, 21))
+        .basePrice(100)
+        .maxPrice(200)
+        .limitOfEnrollment(100)
+        .location("강남역 D2 스타텁 팩토리")
+        .free(false)
+        .offline(true)
+        .eventStatus(EventStatus.DRAFT)
         .build();
 
     return eventRepository.save(event);
