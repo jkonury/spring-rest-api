@@ -231,12 +231,36 @@ public class EventControllerTest {
         .andDo(document("query-events"));
   }
 
-  private void generateEvent(int index) {
+  @Test
+  @TestDescription("없는 이벤트 하나 조회하기")
+  public void getEvent404() throws Exception {
+    mockMvc.perform(get("/api/events/{id}", Long.MAX_VALUE))
+        .andDo(print())
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @TestDescription("이벤트 하나 조회하기")
+  public void getEvent() throws Exception {
+    // given
+    Event event = generateEvent(100);
+
+    // when & then
+    mockMvc.perform(get("/api/events/{id}", event.getId()))
+        .andDo(print())
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("name").exists())
+        .andExpect(jsonPath("id").exists())
+        .andExpect(jsonPath("_links.self").exists())
+        .andExpect(jsonPath("_links.profile").exists());
+  }
+
+  private Event generateEvent(int index) {
     Event event = Event.builder()
         .name("event " + index)
         .description("test event")
         .build();
 
-    eventRepository.save(event);
+    return eventRepository.save(event);
   }
 }

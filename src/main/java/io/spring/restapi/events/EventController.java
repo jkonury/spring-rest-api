@@ -4,6 +4,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 import io.spring.restapi.common.ErrorResource;
 import java.net.URI;
+import java.util.Optional;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -62,5 +64,18 @@ public class EventController {
     pagedResources.add(new Link("/docs/index.html#resources-events-list").withRel("profile"));
 
     return ResponseEntity.ok(pagedResources);
+  }
+
+  @GetMapping("/{id}")
+  public ResponseEntity getEvent(@PathVariable Long id) {
+    Optional<Event> optionalEvent = eventRepository.findById(id);
+    if (optionalEvent.isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+
+    Event event = optionalEvent.get();
+    EventResource eventResource = new EventResource(event);
+    eventResource.add(new Link("/docs/index.html#resources-events-get").withRel("profile"));
+    return ResponseEntity.ok(eventResource);
   }
 }
