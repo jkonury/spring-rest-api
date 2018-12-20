@@ -1,11 +1,13 @@
 package io.spring.restapi.events;
 
+import io.spring.restapi.accounts.Account;
 import java.time.LocalDateTime;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -41,6 +43,9 @@ public class Event {
   @Enumerated(EnumType.STRING)
   @Builder.Default
   private EventStatus eventStatus = EventStatus.DRAFT;
+
+  @ManyToOne
+  private Account manager;
 
   public void update() {
     // Update free
