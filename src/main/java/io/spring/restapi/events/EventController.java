@@ -2,6 +2,7 @@ package io.spring.restapi.events;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
+import io.spring.restapi.common.ErrorResource;
 import java.net.URI;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,7 @@ public class EventController {
   public ResponseEntity createEvent(@RequestBody @Valid EventDto eventDto, Errors errors) {
     if (errors.hasErrors() || !eventValidator.validate(eventDto, errors)) {
       errors.getAllErrors().forEach(e -> log.error("{} : {}", e.getCode(), e.getDefaultMessage()));
-      return ResponseEntity.badRequest().body(errors);
+      return ResponseEntity.badRequest().body(new ErrorResource(errors));
     }
 
     Event event = modelMapper.map(eventDto, Event.class);
