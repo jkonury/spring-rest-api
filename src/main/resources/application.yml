@@ -24,8 +24,9 @@ spring:
     hikari:
       driver-class-name: org.postgresql.Driver
 
-#logging:
-#  level:
+logging:
+  level:
+    org.springframework.security: debug
 #    org.hibernate.SQL: debug
 #    org.hibernate.type.descriptor.sql.BasicBinder: trace
 
