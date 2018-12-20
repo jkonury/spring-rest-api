@@ -24,10 +24,10 @@ spring:
     hikari:
       driver-class-name: org.postgresql.Driver
 
-logging:
-  level:
+#logging:
+#  level:
 #    org.hibernate.SQL: debug
-    org.hibernate.type.descriptor.sql.BasicBinder: trace
+#    org.hibernate.type.descriptor.sql.BasicBinder: trace
 
 ---
 spring:
@@ -39,7 +39,7 @@ spring:
         format_sql: true
     hibernate:
       ddl-auto: create-drop
-logging:
-  level:
+#logging:
+#  level:
 #    org.hibernate.SQL: debug
-    org.hibernate.type.descriptor.sql: trace
+#    org.hibernate.type.descriptor.sql: trace
