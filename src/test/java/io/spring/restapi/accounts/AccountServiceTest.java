@@ -62,7 +62,7 @@ public class AccountServiceTest {
   @Test
   public void expectedExceptionTest() {
     // expected
-    String username = "test@email.com";
+    String username = "test@mail.com";
     expectedException.expect(UsernameNotFoundException.class);
     expectedException.expectMessage(Matchers.containsString(username));
 

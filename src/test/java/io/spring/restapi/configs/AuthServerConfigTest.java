@@ -37,10 +37,10 @@ public class AuthServerConfigTest extends BaseControllerTest {
     accountService.saveAccount(account);
 
     mockMvc.perform(post("/oauth/token")
-      .with(httpBasic(clientId, clientSecret))
-      .param("grant_type","password")
-      .param("username", email)
-      .param("password", password))
+        .with(httpBasic(clientId, clientSecret))
+        .param("grant_type","password")
+        .param("username", email)
+        .param("password", password))
       .andDo(print())
       .andExpect(status().isOk())
       .andExpect(jsonPath("access_token").isNotEmpty())
