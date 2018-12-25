@@ -1,6 +1,8 @@
 package io.spring.restapi.events;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.spring.restapi.accounts.Account;
+import io.spring.restapi.accounts.AccountSerializer;
 import java.time.LocalDateTime;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -45,6 +47,7 @@ public class Event {
   private EventStatus eventStatus = EventStatus.DRAFT;
 
   @ManyToOne
+  @JsonSerialize(using = AccountSerializer.class)
   private Account manager;
 
   public void update() {
