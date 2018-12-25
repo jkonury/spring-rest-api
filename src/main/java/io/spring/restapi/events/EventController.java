@@ -2,6 +2,8 @@ package io.spring.restapi.events;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
+import io.spring.restapi.accounts.Account;
+import io.spring.restapi.accounts.CurrentUser;
 import io.spring.restapi.common.ErrorResource;
 import java.net.URI;
 import java.util.Optional;
@@ -17,7 +19,10 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,7 +43,12 @@ public class EventController {
   private final EventValidator eventValidator;
 
   @PostMapping
-  public ResponseEntity createEvent(@RequestBody @Valid EventDto eventDto, Errors errors) {
+  public ResponseEntity createEvent(@RequestBody @Valid EventDto eventDto,
+                                    Errors errors,
+                                    @CurrentUser Account account) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    log.info("{}", authentication);
+
     if (errors.hasErrors() || !eventValidator.validate(eventDto, errors)) {
       errors.getAllErrors().forEach(e -> log.error("{} : {}", e.getCode(), e.getDefaultMessage()));
       return ResponseEntity.badRequest().body(new ErrorResource(errors));
@@ -46,6 +56,7 @@ public class EventController {
 
     Event event = modelMapper.map(eventDto, Event.class);
     event.update();
+    event.setManager(account);
     Event newEvent = eventRepository.save(event);
     final ControllerLinkBuilder selfLinkBuilder = linkTo(EventController.class).slash(newEvent.getId());
     final URI createUri = selfLinkBuilder.toUri();
@@ -58,17 +69,25 @@ public class EventController {
   }
 
   @GetMapping
-  public ResponseEntity queryEvents(Pageable pageable, PagedResourcesAssembler<Event> assembler) {
+  public ResponseEntity queryEvents(Pageable pageable,
+                                    PagedResourcesAssembler<Event> assembler,
+                                    @CurrentUser Account account) {
 
     Page<Event> page = eventRepository.findAll(pageable);
     PagedResources<Resource<Event>> pagedResources = assembler.toResource(page, e -> new EventResource(e));
+
+    if (account != null) {
+      pagedResources.add(linkTo(EventController.class).withRel("create-event"));
+    }
+
     pagedResources.add(new Link("/docs/index.html#resources-events-list").withRel("profile"));
 
     return ResponseEntity.ok(pagedResources);
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity getEvent(@PathVariable Long id) {
+  public ResponseEntity getEvent(@PathVariable Long id,
+                                 @CurrentUser Account account) {
     Optional<Event> optionalEvent = eventRepository.findById(id);
     if (optionalEvent.isEmpty()) {
       return ResponseEntity.notFound().build();
@@ -77,11 +96,19 @@ public class EventController {
     Event event = optionalEvent.get();
     EventResource eventResource = new EventResource(event);
     eventResource.add(new Link("/docs/index.html#resources-events-get").withRel("profile"));
+
+    if (event.getManager().equals(account)) {
+      eventResource.add(linkTo(EventController.class).slash(event.getId()).withRel("update-event"));
+    }
+
     return ResponseEntity.ok(eventResource);
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity updateEvent(@PathVariable Long id, @RequestBody @Valid EventDto eventDto, Errors errors) {
+  public ResponseEntity updateEvent(@PathVariable Long id,
+                                    @RequestBody @Valid EventDto eventDto,
+                                    Errors errors,
+                                    @CurrentUser Account account) {
     if (errors.hasErrors() || !eventValidator.validate(eventDto, errors)) {
       errors.getAllErrors().forEach(e -> log.error("{} : {}", e.getCode(), e.getDefaultMessage()));
       return ResponseEntity.badRequest().body(new ErrorResource(errors));
@@ -93,6 +120,9 @@ public class EventController {
     }
 
     Event existingEvent = optionalEvent.get();
+    if (!existingEvent.getManager().equals(account)) {
+      return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+    }
 
     modelMapper.map(eventDto, existingEvent);
     Event event = eventRepository.save(existingEvent);

@@ -141,6 +141,7 @@ public class EventControllerTest extends BaseControllerTest {
           fieldWithPath("offline").description("it tells if this event is offline event or not"),
           fieldWithPath("eventStatus").description("event status"),
           fieldWithPath("manager").description("event manager"),
+          fieldWithPath("manager.id").description("event manager id"),
           fieldWithPath("_links.self.href").description("link to self"),
           fieldWithPath("_links.query-events.href").description("link to query event list"),
           fieldWithPath("_links.update-event.href").description("link to update existing event"),
@@ -247,11 +248,34 @@ public class EventControllerTest extends BaseControllerTest {
     return parser.parseMap(responseBody).get("access_token").toString();
   }
 
+  private String getAccessToken(String username, String password) throws Exception {
+    // given
+
+    final ResultActions perform = mockMvc.perform(post("/oauth/token")
+      .with(httpBasic(appProperties.getClientId(), appProperties.getClientSecret()))
+      .param("username", username)
+      .param("password", password)
+      .param("grant_type", "password"));
+
+    final String responseBody = perform.andReturn().getResponse().getContentAsString();
+    Jackson2JsonParser parser = new Jackson2JsonParser();
+
+    return parser.parseMap(responseBody).get("access_token").toString();
+  }
+
   @Test
   @TestDescription("30개의 이벤트를 10개씩 두번째 페이지 조회하기")
   public void queryEvents() throws Exception {
     // given
-    IntStream.range(0, 30).forEach(this::generateEvent);
+    Account account = Account.builder()
+      .email(appProperties.getAdminEmail())
+      .password(appProperties.getAdminPassword())
+      .roles(Set.of(AccountRole.ADMIN, AccountRole.USER))
+      .build();
+
+    Account manger = accountService.saveAccount(account);
+
+    IntStream.range(0, 30).forEach(i -> generateEvent(i, manger));
 
     // when & then
     mockMvc.perform(get("/api/events")
@@ -280,7 +304,14 @@ public class EventControllerTest extends BaseControllerTest {
   @TestDescription("이벤트 하나 조회하기")
   public void getEvent() throws Exception {
     // given
-    Event event = generateEvent(100);
+    Account account = Account.builder()
+      .email(appProperties.getAdminEmail())
+      .password(appProperties.getAdminPassword())
+      .roles(Set.of(AccountRole.ADMIN, AccountRole.USER))
+      .build();
+    Account manger = accountService.saveAccount(account);
+
+    Event event = generateEvent(100, manger);
 
     // when & then
     mockMvc.perform(get("/api/events/{id}", event.getId())
@@ -297,13 +328,20 @@ public class EventControllerTest extends BaseControllerTest {
   @TestDescription("이벤트 수정하기")
   public void updateEvent() throws Exception {
     // given
-    Event event = generateEvent(100);
+    Account account = Account.builder()
+      .email(appProperties.getAdminEmail())
+      .password(appProperties.getAdminPassword())
+      .roles(Set.of(AccountRole.ADMIN, AccountRole.USER))
+      .build();
+
+    Account manger = accountService.saveAccount(account);
+    Event event = generateEvent(100, manger);
 
     EventDto eventDto = modelMapper.map(event, EventDto.class);
     eventDto.setName("Update Event");
 
     // when & then
-    final String bearerToken = getBearerToken();
+    final String bearerToken = "Bearer " + getAccessToken(appProperties.getAdminEmail(), appProperties.getAdminPassword());
     mockMvc.perform(get("/api/events/{id}", event.getId())
         .header(HttpHeaders.AUTHORIZATION, bearerToken))
       .andDo(print())
@@ -328,22 +366,24 @@ public class EventControllerTest extends BaseControllerTest {
     ;
   }
 
-  private Event generateEvent(int index) {
+  private Event generateEvent(int index, Account manager) {
+
     Event event = Event.builder()
-        .name("event " + index)
-        .description("test event")
-        .beginEnrollmentDateTime(LocalDateTime.of(2018, 11, 23, 14, 21))
-        .closeEnrollmentDateTime(LocalDateTime.of(2018, 11, 24, 14, 21))
-        .beginEventDateTime(LocalDateTime.of(2018, 11, 25, 14, 21))
-        .endEventDateTime(LocalDateTime.of(2018, 11, 26, 14, 21))
-        .basePrice(100)
-        .maxPrice(200)
-        .limitOfEnrollment(100)
-        .location("강남역 D2 스타텁 팩토리")
-        .free(false)
-        .offline(true)
-        .eventStatus(EventStatus.DRAFT)
-        .build();
+      .name("event " + index)
+      .description("test event")
+      .beginEnrollmentDateTime(LocalDateTime.of(2018, 11, 23, 14, 21))
+      .closeEnrollmentDateTime(LocalDateTime.of(2018, 11, 24, 14, 21))
+      .beginEventDateTime(LocalDateTime.of(2018, 11, 25, 14, 21))
+      .endEventDateTime(LocalDateTime.of(2018, 11, 26, 14, 21))
+      .basePrice(100)
+      .maxPrice(200)
+      .limitOfEnrollment(100)
+      .location("강남역 D2 스타텁 팩토리")
+      .free(false)
+      .offline(true)
+      .eventStatus(EventStatus.DRAFT)
+      .manager(manager)
+      .build();
 
     return eventRepository.save(event);
   }
