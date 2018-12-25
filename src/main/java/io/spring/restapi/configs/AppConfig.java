@@ -4,6 +4,7 @@ import io.spring.restapi.accounts.Account;
 import io.spring.restapi.accounts.AccountRepository;
 import io.spring.restapi.accounts.AccountRole;
 import io.spring.restapi.accounts.AccountService;
+import io.spring.restapi.common.AppProperties;
 import java.util.Optional;
 import java.util.Set;
 import org.modelmapper.ModelMapper;
@@ -38,18 +39,33 @@ public class AppConfig {
       @Autowired
       AccountRepository accountRepository;
 
+      @Autowired
+      AppProperties appProperties;
+
       @Override
       public void run(ApplicationArguments args) throws Exception {
-        final Account account = Account.builder()
-          .email("test@test.com")
-          .password("pass")
+        final Account admin = Account.builder()
+          .email(appProperties.getAdminEmail())
+          .password(appProperties.getAdminPassword())
           .roles(Set.of(AccountRole.ADMIN, AccountRole.USER))
           .build();
 
-        final Optional<Account> findAccount = accountRepository.findByEmail(account.getEmail());
+        Optional<Account> findAccount = accountRepository.findByEmail(admin.getEmail());
 
         if (findAccount.isEmpty()) {
-          accountService.saveAccount(account);
+          accountService.saveAccount(admin);
+        }
+
+        final Account user = Account.builder()
+          .email(appProperties.getUserEmail())
+          .password(appProperties.getUserPassword())
+          .roles(Set.of(AccountRole.USER))
+          .build();
+
+        findAccount = accountRepository.findByEmail(user.getEmail());
+
+        if (findAccount.isEmpty()) {
+          accountService.saveAccount(user);
         }
       }
     };

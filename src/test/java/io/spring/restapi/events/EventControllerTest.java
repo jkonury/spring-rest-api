@@ -22,6 +22,7 @@ import io.spring.restapi.accounts.Account;
 import io.spring.restapi.accounts.AccountRepository;
 import io.spring.restapi.accounts.AccountRole;
 import io.spring.restapi.accounts.AccountService;
+import io.spring.restapi.common.AppProperties;
 import io.spring.restapi.common.BaseControllerTest;
 import io.spring.restapi.common.TestDescription;
 import java.time.LocalDateTime;
@@ -47,6 +48,9 @@ public class EventControllerTest extends BaseControllerTest {
 
   @Autowired
   AccountService accountService;
+
+  @Autowired
+  AppProperties appProperties;
 
   @Before
   public void setUp() {
@@ -223,23 +227,18 @@ public class EventControllerTest extends BaseControllerTest {
 
   private String getAccessToken() throws Exception {
     // given
-    final String email = "test@email.com";
-    final String password = "password";
     Account account = Account.builder()
-      .email(email)
-      .password(password)
+      .email(appProperties.getUserEmail())
+      .password(appProperties.getUserPassword())
       .roles(Set.of(AccountRole.ADMIN, AccountRole.USER))
       .build();
 
     accountService.saveAccount(account);
 
-    String clientId = "myApp";
-    String clientSecret = "pass";
-
     final ResultActions perform = mockMvc.perform(post("/oauth/token")
-      .with(httpBasic(clientId, clientSecret))
-      .param("username", email)
-      .param("password", password)
+      .with(httpBasic(appProperties.getClientId(), appProperties.getClientSecret()))
+      .param("username", appProperties.getUserEmail())
+      .param("password", appProperties.getUserPassword())
       .param("grant_type", "password"));
 
     final String responseBody = perform.andReturn().getResponse().getContentAsString();

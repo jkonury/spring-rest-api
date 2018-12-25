@@ -36,7 +36,7 @@ dependencies {
   implementation 'org.modelmapper:modelmapper:2.3.1'
   implementation 'org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:2.1.0.RELEASE'
   runtimeOnly('org.springframework.boot:spring-boot-devtools')
-  testImplementation('com.h2database:h2')
+  runtimeOnly('com.h2database:h2')
   runtimeOnly('org.postgresql:postgresql')
   compileOnly('org.projectlombok:lombok')
   testImplementation('org.springframework.boot:spring-boot-starter-test')
@@ -44,6 +44,8 @@ dependencies {
   testImplementation 'pl.pragmatists:JUnitParams:1.1.1'
   testImplementation 'org.springframework.security:spring-security-test'
 
+  compileOnly "org.springframework.boot:spring-boot-configuration-processor"
+//  annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
   asciidoctor "org.springframework.restdocs:spring-restdocs-asciidoctor"
 }
 
@@ -71,3 +73,5 @@ task copyDocument(type: Copy) {
 build {
   dependsOn copyDocument
 }
+
+compileJava.dependsOn(processResources)

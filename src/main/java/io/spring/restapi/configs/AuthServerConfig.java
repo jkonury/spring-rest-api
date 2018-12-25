@@ -1,6 +1,7 @@
 package io.spring.restapi.configs;
 
 import io.spring.restapi.accounts.AccountService;
+import io.spring.restapi.common.AppProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,6 +22,7 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
   private final AuthenticationManager authenticationManager;
   private final AccountService accountService;
   private final TokenStore tokenStore;
+  private final AppProperties appProperties;
 
   @Override
   public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
@@ -30,10 +32,10 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
   @Override
   public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
     clients.inMemory()
-      .withClient("myApp")
+      .withClient(appProperties.getClientId())
       .authorizedGrantTypes("password", "refresh_token")
       .scopes("read", "write")
-      .secret(passwordEncoder.encode("pass"))
+      .secret(passwordEncoder.encode(appProperties.getClientSecret()))
       .accessTokenValiditySeconds(10 * 60)
       .refreshTokenValiditySeconds(6 * 10 * 60);
   }
