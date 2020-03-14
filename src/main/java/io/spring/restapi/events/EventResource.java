@@ -1,11 +1,12 @@
 package io.spring.restapi.events;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.Resource;
 
-public class EventResource extends Resource<Event> {
+public class EventResource extends EntityModel<Event> {
 
 
   public EventResource(Event event, Link... links) {

@@ -1,6 +1,6 @@
 package io.spring.restapi.events;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 import io.spring.restapi.accounts.Account;
 import io.spring.restapi.accounts.CurrentUser;
@@ -16,9 +16,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.mvc.ControllerLinkBuilder;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "/api/events", produces = MediaTypes.HAL_JSON_UTF8_VALUE)
+@RequestMapping(value = "/api/events", produces = MediaTypes.HAL_JSON_VALUE)
 @Slf4j
 public class EventController {
 
@@ -58,7 +58,7 @@ public class EventController {
     event.update();
     event.setManager(account);
     Event newEvent = eventRepository.save(event);
-    final ControllerLinkBuilder selfLinkBuilder = linkTo(EventController.class).slash(newEvent.getId());
+    final WebMvcLinkBuilder selfLinkBuilder = linkTo(EventController.class).slash(newEvent.getId());
     final URI createUri = selfLinkBuilder.toUri();
 
     final EventResource eventResource = new EventResource(event);
@@ -74,7 +74,7 @@ public class EventController {
                                     @CurrentUser Account account) {
 
     Page<Event> page = eventRepository.findAll(pageable);
-    PagedResources<Resource<Event>> pagedResources = assembler.toResource(page, e -> new EventResource(e));
+    PagedModel<EntityModel<Event>> pagedResources = assembler.toModel(page, e -> new EventResource(e));
 
     if (account != null) {
       pagedResources.add(linkTo(EventController.class).withRel("create-event"));

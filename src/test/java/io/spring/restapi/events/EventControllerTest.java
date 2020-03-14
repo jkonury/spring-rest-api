@@ -62,7 +62,7 @@ public class EventControllerTest extends BaseControllerTest {
   public void createNullEvent() throws Exception {
     mockMvc.perform(post("/api/events")
         .header(HttpHeaders.AUTHORIZATION, getBearerToken())
-        .contentType(MediaType.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaTypes.HAL_JSON))
       .andDo(print())
       .andExpect(status().isBadRequest());
@@ -87,14 +87,14 @@ public class EventControllerTest extends BaseControllerTest {
 
     mockMvc.perform(post("/api/events")
         .header(HttpHeaders.AUTHORIZATION, getBearerToken())
-        .contentType(MediaType.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaTypes.HAL_JSON)
         .content(objectMapper.writeValueAsString(event)))
       .andDo(print())
       .andExpect(status().isCreated())
       .andExpect(jsonPath("id").exists())
       .andExpect(header().exists(HttpHeaders.LOCATION))
-      .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE))
+      .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE))
       .andExpect(jsonPath("free").value(false))
       .andExpect(jsonPath("offline").value(true))
       .andExpect(jsonPath("eventStatus").value(Matchers.is("DRAFT")))
@@ -176,7 +176,7 @@ public class EventControllerTest extends BaseControllerTest {
       .build();
 
     mockMvc.perform(post("/api/events")
-      .contentType(MediaType.APPLICATION_JSON_UTF8)
+      .contentType(MediaType.APPLICATION_JSON)
       .accept(MediaTypes.HAL_JSON)
       .content(objectMapper.writeValueAsString(event)))
       .andDo(print())
@@ -190,7 +190,7 @@ public class EventControllerTest extends BaseControllerTest {
 
     mockMvc.perform(post("/api/events")
         .header(HttpHeaders.AUTHORIZATION, getBearerToken())
-        .contentType(MediaType.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaTypes.HAL_JSON)
         .content(objectMapper.writeValueAsString(eventDto)))
       .andExpect(status().isBadRequest());
@@ -215,7 +215,7 @@ public class EventControllerTest extends BaseControllerTest {
 
     mockMvc.perform(post("/api/events")
         .header(HttpHeaders.AUTHORIZATION, getBearerToken())
-        .contentType(MediaType.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaTypes.HAL_JSON)
         .content(objectMapper.writeValueAsString(event)))
       .andDo(print())
@@ -353,7 +353,7 @@ public class EventControllerTest extends BaseControllerTest {
 
     mockMvc.perform(put("/api/events/{id}", event.getId())
         .header(HttpHeaders.AUTHORIZATION, bearerToken)
-        .contentType(MediaType.APPLICATION_JSON_UTF8)
+        .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaTypes.HAL_JSON)
         .content(objectMapper.writeValueAsString(eventDto)))
       .andDo(print())
