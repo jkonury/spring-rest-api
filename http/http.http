@@ -1,0 +1,41 @@
+# For a quick start check out our HTTP Requests collection (Tools|HTTP Client|Open HTTP Requests Collection).
+#
+# Following HTTP Request Live Templates are available:
+# * 'gtrp' and 'gtr' create a GET request with or without query parameters;
+# * 'ptr' and 'ptrp' create a POST request with a simple or parameter-like body;
+# * 'mptr' and 'fptr' create a POST request to submit a form with a text or file field (multipart/form-data);
+
+POST http://localhost:8080/oauth/token
+Accept: application/json
+Content-Type: application/x-www-form-urlencoded
+Authorization: Basic bXlBcHA6cGFzcw==
+
+username=admin@email.com&password=admin&grant_type=password
+
+> {%
+client.global.set("access_token", response.body.access_token );
+client.global.set("refresh_token", response.body.refresh_token );
+client.log("access_token: " + client.global.get("access_token"));
+client.log("refresh_token: " + client.global.get("refresh_token"));
+%}
+###
+
+GET http://localhost:8080/users/user
+Accept: application/json
+Authorization: Bearer {{access_token}}
+
+###
+
+
+POST http://localhost:8080/oauth/token
+Accept: application/json
+Content-Type: application/x-www-form-urlencoded
+Authorization: Basic clientId password
+
+username=user&password=password&grant_type=refresh_token&refresh_token={{refresh_token}}
+
+> {%
+client.global.set("access_token", response.body.access_token );
+client.log("access_token: " + client.global.get("access_token"));
+%}
+###
