@@ -2,6 +2,7 @@ plugins {
   id 'org.springframework.boot' version '2.3.0.RELEASE'
   id 'io.spring.dependency-management' version '1.0.9.RELEASE'
   id "org.asciidoctor.convert" version "2.4.0"
+  id 'jacoco'
   id 'java'
 }
 
@@ -42,6 +43,7 @@ dependencies {
   testImplementation('org.springframework.boot:spring-boot-starter-test')
   testImplementation('org.springframework.restdocs:spring-restdocs-mockmvc')
   testImplementation 'org.springframework.security:spring-security-test'
+  testImplementation 'nl.jqno.equalsverifier:equalsverifier:3.6'
 
   annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
   asciidoctor "org.springframework.restdocs:spring-restdocs-asciidoctor"
@@ -59,6 +61,75 @@ ext {
 test {
   useJUnitPlatform()
   outputs.dir snippetsDir
+  finalizedBy jacocoTestReport // report is always generated after tests run
+}
+
+jacocoTestReport {
+  reports {
+    // 원하는 리포트를 켜고 끌 수 있습니다.
+    html.enabled true
+    xml.enabled false
+    csv.enabled false
+
+    //  각 리포트 타입 마다 리포트 저장 경로를 설정할 수 있습니다.
+//    html.destination file("$buildDir/jacocoHtml")
+//    xml.destination file("$buildDir/jacoco.xml")
+  }
+  dependsOn test // tests are required to run before generating the report
+  finalizedBy jacocoTestCoverageVerification
+}
+
+jacoco {
+  toolVersion = "0.8.6"
+//  reportsDirectory = layout.buildDirectory.dir('customJacocoReportDir')
+}
+
+jacocoTestCoverageVerification {
+  violationRules {
+    rule {
+      element = 'CLASS'
+
+      limit {
+        minimum = 0.7
+      }
+
+      excludes = [
+          '*.Application'
+      ]
+    }
+
+    rule {
+      // 룰을 간단히 켜고 끌 수 있습니다.
+      enabled = true
+
+      // 룰을 체크할 단위는 클래스 단위
+      element = 'CLASS'
+
+      // 브랜치 커버리지를 최소한 50% 만족시켜야 합니다.
+      limit {
+        counter = 'BRANCH'
+        value = 'COVEREDRATIO'
+        minimum = 0.50
+      }
+
+      // 라인 커버리지를 최소한 70% 만족시켜야 합니다.
+      limit {
+        counter = 'LINE'
+        value = 'COVEREDRATIO'
+        minimum = 0.70
+      }
+
+      // 빈 줄을 제외한 코드의 라인수를 최대 200라인으로 제한합니다.
+      limit {
+        counter = 'LINE'
+        value = 'TOTALCOUNT'
+        maximum = 200
+      }
+      excludes = [
+          '*.Application'
+      ]
+    }
+  }
 }
 
 asciidoctor {

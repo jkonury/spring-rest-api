@@ -5,7 +5,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import io.spring.restapi.accounts.Account;
 import io.spring.restapi.accounts.CurrentUser;
-import io.spring.restapi.common.ErrorResource;
 import io.spring.restapi.index.IndexController;
 import java.net.URI;
 import java.util.Optional;
@@ -53,7 +52,7 @@ public class EventController {
 
     if (errors.hasErrors() || !eventValidator.validate(eventDto, errors)) {
       errors.getAllErrors().forEach(e -> log.error("{} : {}", e.getCode(), e.getDefaultMessage()));
-      final EntityModel<Errors> errorResource = ErrorResource.of(errors);
+      final EntityModel<Errors> errorResource = EntityModel.of(errors);
       errorResource.add(linkTo(methodOn(IndexController.class).index()).withRel("index"));
       return ResponseEntity.badRequest().body(errorResource);
     }
@@ -65,7 +64,7 @@ public class EventController {
     final WebMvcLinkBuilder selfLinkBuilder = linkTo(EventController.class).slash(newEvent.getId());
     final URI createUri = selfLinkBuilder.toUri();
 
-    final EntityModel<Event> eventResource = EventResource.of(event);
+    final EntityModel<Event> eventResource = EntityModel.of(event);
     eventResource.add(linkTo(EventController.class).slash(event.getId()).withSelfRel());
     eventResource.add(linkTo(EventController.class).withRel("query-events"));
     eventResource.add(selfLinkBuilder.withRel("update-event"));
@@ -80,7 +79,7 @@ public class EventController {
 
     Page<Event> page = eventRepository.findAll(pageable);
     PagedModel<EntityModel<Event>> pagedResources = assembler.toModel(page, event -> {
-      final EntityModel<Event> eventResource = EventResource.of(event);
+      final EntityModel<Event> eventResource = EntityModel.of(event);
       eventResource.add(linkTo(EventController.class).slash(event.getId()).withSelfRel());
       return eventResource;
     });
@@ -103,7 +102,7 @@ public class EventController {
     }
 
     Event event = optionalEvent.get();
-    final EntityModel<Event> eventResource = EventResource.of(event);
+    final EntityModel<Event> eventResource = EntityModel.of(event);
     eventResource.add(linkTo(EventController.class).slash(event.getId()).withSelfRel());
     eventResource.add(Link.of("/docs/index.html#resources-events-get").withRel("profile"));
 
@@ -121,10 +120,9 @@ public class EventController {
                                     @CurrentUser Account account) {
     if (errors.hasErrors() || !eventValidator.validate(eventDto, errors)) {
       errors.getAllErrors().forEach(e -> log.error("{} : {}", e.getCode(), e.getDefaultMessage()));
-      final EntityModel<Errors> errorResource = ErrorResource.of(errors);
+      final EntityModel<Errors> errorResource = EntityModel.of(errors);
       errorResource.add(linkTo(methodOn(IndexController.class).index()).withRel("index"));
       return ResponseEntity.badRequest().body(errorResource);
-//      return ResponseEntity.badRequest().body(new ErrorResource(errors));
     }
     
     Optional<Event> optionalEvent = eventRepository.findById(id);
@@ -134,13 +132,13 @@ public class EventController {
 
     Event existingEvent = optionalEvent.get();
     if (!existingEvent.getManager().equals(account)) {
-      return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
     modelMapper.map(eventDto, existingEvent);
     Event event = eventRepository.save(existingEvent);
 
-    final EntityModel<Event> eventResource = EventResource.of(event);
+    final EntityModel<Event> eventResource = EntityModel.of(event);
     eventResource.add(linkTo(EventController.class).slash(event.getId()).withSelfRel());
     eventResource.add(Link.of("/docs/index.html#resources-events-update").withRel("profile"));
     return ResponseEntity.ok(eventResource);

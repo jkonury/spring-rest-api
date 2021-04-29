@@ -16,8 +16,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Getter @Setter @EqualsAndHashCode(of = "id")
-@Builder @NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@EqualsAndHashCode(of = "id")
+@NoArgsConstructor
 public class Account {
 
   @Id @GeneratedValue
@@ -29,4 +31,10 @@ public class Account {
   @Enumerated(EnumType.STRING)
   private Set<AccountRole> roles;
 
+  @Builder
+  public Account(String email, String password, Set<AccountRole> roles) {
+    this.email = email;
+    this.password = password;
+    this.roles = roles;
+  }
 }

@@ -3,6 +3,8 @@ package io.spring.restapi.events;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.stream.Stream;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -61,6 +63,23 @@ public class EventTest {
 
     // Then
     assertThat(event.isOffline()).isEqualTo(isOffline);
+  }
+
+  @Test
+  public void equalsEvent() {
+    EqualsVerifier
+      .forClass(Event.class)
+      .suppress(Warning.SURROGATE_KEY)
+      .verify();
+  }
+
+  @Test
+  public void simpleEqualsEvent() {
+    EqualsVerifier
+      .simple()
+      .forClass(Event.class)
+      .suppress(Warning.SURROGATE_KEY)
+      .verify();
   }
 
   private static Stream<Arguments> parametersForTestFree() {

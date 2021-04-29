@@ -414,6 +414,82 @@ public class EventControllerTest extends BaseControllerTest {
     ;
   }
 
+  @Test
+  @DisplayName("없는 이벤트 수정하기")
+  public void updateEventError() throws Exception {
+    // given
+    Account account = Account.builder()
+      .email(appProperties.getAdminEmail())
+      .password(appProperties.getAdminPassword())
+      .roles(Set.of(AccountRole.ADMIN, AccountRole.USER))
+      .build();
+
+    Account manger = accountService.saveAccount(account);
+    Event event = generateEvent(100, manger);
+
+    EventDto eventDto = modelMapper.map(event, EventDto.class);
+    eventDto.setName("Update Event");
+
+    // when & then
+    final String bearerToken = "Bearer " + getAccessToken(appProperties.getAdminEmail(), appProperties.getAdminPassword());
+    mockMvc.perform(get("/api/events/{id}", event.getId())
+        .header(HttpHeaders.AUTHORIZATION, bearerToken))
+      .andDo(print())
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("name").exists())
+      .andExpect(jsonPath("id").exists())
+      .andExpect(jsonPath("_links.self").exists())
+      .andExpect(jsonPath("_links.profile").exists());
+
+    mockMvc.perform(put("/api/events/{id}", Long.MAX_VALUE)
+        .header(HttpHeaders.AUTHORIZATION, bearerToken)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaTypes.HAL_JSON)
+        .content(objectMapper.writeValueAsString(eventDto)))
+      .andDo(print())
+      .andExpect(status().isNotFound())
+    ;
+  }
+
+  @Test
+  @DisplayName("잘못된 입력 값으로 이벤트 수정하기")
+  public void updateEventErrorBadRequest() throws Exception {
+    // given
+    Account account = Account.builder()
+      .email(appProperties.getAdminEmail())
+      .password(appProperties.getAdminPassword())
+      .roles(Set.of(AccountRole.ADMIN, AccountRole.USER))
+      .build();
+
+    Account manger = accountService.saveAccount(account);
+    Event event = generateEvent(100, manger);
+
+    EventDto eventDto = modelMapper.map(event, EventDto.class);
+    eventDto.setName("Update Event");
+    eventDto.setBasePrice(10000);
+    eventDto.setMaxPrice(100);
+
+    // when & then
+    final String bearerToken = "Bearer " + getAccessToken(appProperties.getAdminEmail(), appProperties.getAdminPassword());
+    mockMvc.perform(get("/api/events/{id}", event.getId())
+        .header(HttpHeaders.AUTHORIZATION, bearerToken))
+      .andDo(print())
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("name").exists())
+      .andExpect(jsonPath("id").exists())
+      .andExpect(jsonPath("_links.self").exists())
+      .andExpect(jsonPath("_links.profile").exists());
+
+    mockMvc.perform(put("/api/events/{id}", event.getId())
+        .header(HttpHeaders.AUTHORIZATION, bearerToken)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaTypes.HAL_JSON)
+        .content(objectMapper.writeValueAsString(eventDto)))
+      .andDo(print())
+      .andExpect(status().isBadRequest())
+    ;
+  }
+
   private Event generateEvent(int index, Account manager) {
 
     Event event = Event.builder()
