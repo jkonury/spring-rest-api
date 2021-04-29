@@ -18,24 +18,26 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.spring.restapi.accounts.Account;
 import io.spring.restapi.accounts.AccountRepository;
 import io.spring.restapi.accounts.AccountRole;
 import io.spring.restapi.accounts.AccountService;
 import io.spring.restapi.common.AppProperties;
 import io.spring.restapi.common.BaseControllerTest;
-import io.spring.restapi.common.TestDescription;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.IntStream;
 import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.security.oauth2.common.util.Jackson2JsonParser;
 import org.springframework.test.web.servlet.ResultActions;
 
 public class EventControllerTest extends BaseControllerTest {
@@ -51,8 +53,11 @@ public class EventControllerTest extends BaseControllerTest {
 
   @Autowired
   AppProperties appProperties;
+  
+  @Autowired
+  ObjectMapper mapper;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     eventRepository.deleteAll();
     accountRepository.deleteAll();
@@ -69,7 +74,7 @@ public class EventControllerTest extends BaseControllerTest {
   }
 
   @Test
-  @TestDescription("정상적으로 이벤트를 생성하는 테스트")
+  @DisplayName("정상적으로 이벤트를 생성하는 테스트")
   public void createEvent() throws Exception {
 
     EventDto event = EventDto.builder()
@@ -154,8 +159,9 @@ public class EventControllerTest extends BaseControllerTest {
     return "Bearer " + getAccessToken();
   }
 
-//  @Test
-  @TestDescription("입력 받을 수 없는 값을 사용한 경우에 에러가 발생하는 테스트")
+  @Test
+  @DisplayName("입력 받을 수 없는 값을 사용한 경우에 에러가 발생하는 테스트")
+  @Disabled
   public void createEvent_BadRequest() throws Exception {
 
     Event event = Event.builder()
@@ -176,6 +182,7 @@ public class EventControllerTest extends BaseControllerTest {
       .build();
 
     mockMvc.perform(post("/api/events")
+      .header(HttpHeaders.AUTHORIZATION, getBearerToken())
       .contentType(MediaType.APPLICATION_JSON)
       .accept(MediaTypes.HAL_JSON)
       .content(objectMapper.writeValueAsString(event)))
@@ -184,7 +191,7 @@ public class EventControllerTest extends BaseControllerTest {
   }
 
   @Test
-  @TestDescription("입력 값이 비어있는 경우에 에러가 발생하는 테스트")
+  @DisplayName("입력 값이 비어있는 경우에 에러가 발생하는 테스트")
   public void createEvent_BadRequest_Empty_Input() throws Exception {
     EventDto eventDto = EventDto.builder().build();
 
@@ -197,7 +204,7 @@ public class EventControllerTest extends BaseControllerTest {
   }
 
   @Test
-  @TestDescription("입력 값이 잘못된 경우에 에러가 발생하는 테스트")
+  @DisplayName("입력 값이 잘못된 경우에 에러가 발생하는 테스트")
   public void createEvent_BadRequest_Wrong_Input() throws Exception {
 
     EventDto event = EventDto.builder()
@@ -243,9 +250,8 @@ public class EventControllerTest extends BaseControllerTest {
       .param("grant_type", "password"));
 
     final String responseBody = perform.andReturn().getResponse().getContentAsString();
-    Jackson2JsonParser parser = new Jackson2JsonParser();
 
-    return parser.parseMap(responseBody).get("access_token").toString();
+    return parseMap(responseBody).get("access_token").toString();
   }
 
   private String getAccessToken(String username, String password) throws Exception {
@@ -258,13 +264,12 @@ public class EventControllerTest extends BaseControllerTest {
       .param("grant_type", "password"));
 
     final String responseBody = perform.andReturn().getResponse().getContentAsString();
-    Jackson2JsonParser parser = new Jackson2JsonParser();
 
-    return parser.parseMap(responseBody).get("access_token").toString();
+    return parseMap(responseBody).get("access_token").toString();
   }
 
   @Test
-  @TestDescription("30개의 이벤트를 10개씩 두번째 페이지 조회하기")
+  @DisplayName("30개의 이벤트를 10개씩 두번째 페이지 조회하기")
   public void queryEvents() throws Exception {
     // given
     Account account = Account.builder()
@@ -293,7 +298,7 @@ public class EventControllerTest extends BaseControllerTest {
   }
 
   @Test
-  @TestDescription("없는 이벤트 하나 조회하기")
+  @DisplayName("없는 이벤트 하나 조회하기")
   public void getEvent404() throws Exception {
     mockMvc.perform(get("/api/events/{id}", Long.MAX_VALUE))
         .andDo(print())
@@ -301,7 +306,7 @@ public class EventControllerTest extends BaseControllerTest {
   }
 
   @Test
-  @TestDescription("이벤트 하나 조회하기")
+  @DisplayName("이벤트 하나 조회하기")
   public void getEvent() throws Exception {
     // given
     Account account = Account.builder()
@@ -325,7 +330,7 @@ public class EventControllerTest extends BaseControllerTest {
   }
 
   @Test
-  @TestDescription("이벤트 수정하기")
+  @DisplayName("이벤트 수정하기")
   public void updateEvent() throws Exception {
     // given
     Account account = Account.builder()
@@ -362,7 +367,50 @@ public class EventControllerTest extends BaseControllerTest {
       .andExpect(jsonPath("id").exists())
       .andExpect(jsonPath("_links.self").exists())
       .andExpect(jsonPath("_links.profile").exists())
-      .andDo(document("update-event"))
+      .andDo(document("update-event",
+                      links(
+                        linkWithRel("self").description("link to self"),
+                        linkWithRel("profile").description("link to profile")
+                      ),
+                      requestHeaders(
+                        headerWithName(HttpHeaders.ACCEPT).description("accept header"),
+                        headerWithName(HttpHeaders.CONTENT_TYPE).description("content type")
+                      ),
+                      requestFields(
+                        fieldWithPath("name").description("Name of new event"),
+                        fieldWithPath("description").description("description of new event"),
+                        fieldWithPath("beginEnrollmentDateTime").description("date time of begin of new event"),
+                        fieldWithPath("closeEnrollmentDateTime").description("date time of close of new event"),
+                        fieldWithPath("beginEventDateTime").description("date time of begin of new event"),
+                        fieldWithPath("endEventDateTime").description("date time of end of new event"),
+                        fieldWithPath("location").description("location of new event"),
+                        fieldWithPath("basePrice").description("base price of new event"),
+                        fieldWithPath("maxPrice").description("max price of new event"),
+                        fieldWithPath("limitOfEnrollment").description("limit of enrollment")
+                      ),
+                      responseHeaders(
+                        headerWithName(HttpHeaders.CONTENT_TYPE).description("Content type")
+                      ),
+                      responseFields(
+                        fieldWithPath("id").description("identifier of new event"),
+                        fieldWithPath("name").description("Name of new event"),
+                        fieldWithPath("description").description("description of new event"),
+                        fieldWithPath("beginEnrollmentDateTime").description("date time of begin of new event"),
+                        fieldWithPath("closeEnrollmentDateTime").description("date time of close of new event"),
+                        fieldWithPath("beginEventDateTime").description("date time of begin of new event"),
+                        fieldWithPath("endEventDateTime").description("date time of end of new event"),
+                        fieldWithPath("location").description("location of new event"),
+                        fieldWithPath("basePrice").description("base price of new event"),
+                        fieldWithPath("maxPrice").description("max price of new event"),
+                        fieldWithPath("limitOfEnrollment").description("limit of enrollment"),
+                        fieldWithPath("free").description("it tells if this event is free or not"),
+                        fieldWithPath("offline").description("it tells if this event is offline event or not"),
+                        fieldWithPath("eventStatus").description("event status"),
+                        fieldWithPath("manager").description("event manager"),
+                        fieldWithPath("manager.id").description("event manager id"),
+                        fieldWithPath("_links.self.href").description("link to self"),
+                        fieldWithPath("_links.profile.href").description("link to profile")
+                      )))
     ;
   }
 
@@ -386,5 +434,15 @@ public class EventControllerTest extends BaseControllerTest {
       .build();
 
     return eventRepository.save(event);
+  }
+
+  @SuppressWarnings("unchecked")
+  private Map<String, Object> parseMap(String json) {
+    try {
+      return mapper.readValue(json, Map.class);
+    }
+    catch (Exception e) {
+      throw new IllegalArgumentException("Cannot parse json", e);
+    }
   }
 }

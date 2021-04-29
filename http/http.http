@@ -1,10 +1,4 @@
-# For a quick start check out our HTTP Requests collection (Tools|HTTP Client|Open HTTP Requests Collection).
-#
-# Following HTTP Request Live Templates are available:
-# * 'gtrp' and 'gtr' create a GET request with or without query parameters;
-# * 'ptr' and 'ptrp' create a POST request with a simple or parameter-like body;
-# * 'mptr' and 'fptr' create a POST request to submit a form with a text or file field (multipart/form-data);
-
+### get-token
 POST http://localhost:8080/oauth/token
 Accept: application/json
 Content-Type: application/x-www-form-urlencoded
@@ -18,19 +12,14 @@ client.global.set("refresh_token", response.body.refresh_token );
 client.log("access_token: " + client.global.get("access_token"));
 client.log("refresh_token: " + client.global.get("refresh_token"));
 %}
-###
-
-GET http://localhost:8080/users/user
-Accept: application/json
-Authorization: Bearer {{access_token}}
-
-###
 
 
+
+### refresh token
 POST http://localhost:8080/oauth/token
 Accept: application/json
 Content-Type: application/x-www-form-urlencoded
-Authorization: Basic clientId password
+Authorization: Basic bXlBcHA6cGFzcw==
 
 username=user&password=password&grant_type=refresh_token&refresh_token={{refresh_token}}
 
@@ -38,4 +27,60 @@ username=user&password=password&grant_type=refresh_token&refresh_token={{refresh
 client.global.set("access_token", response.body.access_token );
 client.log("access_token: " + client.global.get("access_token"));
 %}
-###
+
+### event list - paging
+
+GET http://localhost:8080/api/events?page=0&size=100&sort=id,desc
+Accept: application/hal+json
+Authorization: Bearer {{access_token}}
+
+### event list
+GET http://localhost:8080/api/events
+Accept: application/hal+json
+Authorization: Bearer {{access_token}}
+
+### create event
+POST http://localhost:8080/api/events
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "name" : "Spring",
+  "description" : "REST API Development with Spring",
+  "beginEnrollmentDateTime" : "2021-11-23T14:21:00",
+  "closeEnrollmentDateTime" : "2021-11-24T14:21:00",
+  "beginEventDateTime" : "2021-11-25T14:21:00",
+  "endEventDateTime" : "2021-11-26T14:21:00",
+  "location" : "Seoul",
+  "basePrice" : 100,
+  "maxPrice" : 200,
+  "limitOfEnrollment" : 100
+}
+
+### create event - error case
+POST http://localhost:8080/api/events
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "name" : "Spring",
+  "description" : "REST API Development with Spring",
+  "beginEnrollmentDateTime" : "2021-04-07T14:21:00",
+  "closeEnrollmentDateTime" : "2021-04-08T14:21:00",
+  "beginEventDateTime" : "2021-04-25T14:21:00",
+  "endEventDateTime" : "2021-04-24T14:21:00",
+  "location" : "Seoul",
+  "basePrice" : 100,
+  "maxPrice" : 200,
+  "limitOfEnrollment" : 100
+}
+
+
+### event detail - without token
+GET http://localhost:8080/api/events/3
+Content-Type: application/hal+json
+
+### event detail - with token
+GET http://localhost:8080/api/events/3
+Content-Type: application/hal+json
+Authorization: Bearer {{access_token}}

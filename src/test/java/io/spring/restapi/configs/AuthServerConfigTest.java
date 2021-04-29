@@ -10,7 +10,8 @@ import io.spring.restapi.accounts.AccountService;
 import io.spring.restapi.common.AppProperties;
 import io.spring.restapi.common.BaseControllerTest;
 import io.spring.restapi.common.TestDescription;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class AuthServerConfigTest extends BaseControllerTest {
@@ -21,7 +22,7 @@ public class AuthServerConfigTest extends BaseControllerTest {
   AppProperties appProperties;
   
   @Test
-  @TestDescription("인증 토큰을 발급 받는 테스트")
+  @DisplayName("인증 토큰을 발급 받는 테스트")
   public void getAuthToken() throws Exception {
 
     mockMvc.perform(post("/oauth/token")

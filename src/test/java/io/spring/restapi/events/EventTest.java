@@ -2,12 +2,12 @@ package io.spring.restapi.events;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-@RunWith(JUnitParamsRunner.class)
 public class EventTest {
 
   @Test
@@ -32,12 +32,8 @@ public class EventTest {
     assertThat(event.getDescription()).isEqualTo(description);
   }
 
-  @Test
-  @Parameters({
-    "0, 0, true",
-    "100, 0, false",
-    "0, 100, false",
-  })
+  @ParameterizedTest
+  @MethodSource("parametersForTestFree")
   public void testFree(int basePrice, int maxPrice, boolean isFree) {
     // Given
     Event event = Event.builder()
@@ -52,8 +48,8 @@ public class EventTest {
     assertThat(event.isFree()).isEqualTo(isFree);
   }
 
-  @Test
-  @Parameters
+  @ParameterizedTest
+  @MethodSource("parametersForTestOffline")
   public void testOffline(String location, boolean isOffline) {
     // Given
     Event event = Event.builder()
@@ -67,11 +63,20 @@ public class EventTest {
     assertThat(event.isOffline()).isEqualTo(isOffline);
   }
 
-  private Object[] parametersForTestOffline() {
-    return new Object[] {
-      new Object[] {"강남", true},
-      new Object[] {null, false},
-      new Object[] {"       ", false}
-    };
+  private static Stream<Arguments> parametersForTestFree() {
+    return Stream.of(
+      Arguments.of(0, 0, true),
+      Arguments.of(100, 0, false),
+      Arguments.of(0, 100, false)
+    );
+  }
+
+  private static Stream<Arguments> parametersForTestOffline() {
+    return Stream.of(
+      Arguments.of("강남", true),
+      Arguments.of(null, false),
+      Arguments.of("       ", false)
+
+    );
   }
 }

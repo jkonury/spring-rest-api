@@ -5,7 +5,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import io.spring.restapi.common.BaseControllerTest;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class IndexControllerTest extends BaseControllerTest {
 
