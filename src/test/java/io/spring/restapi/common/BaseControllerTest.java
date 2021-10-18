@@ -1,7 +1,7 @@
 package io.spring.restapi.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 //@Import(RestDocsConfiguration.class)
 @ExtendWith({RestDocumentationExtension.class})
 @ActiveProfiles("test")
-@Ignore
+@Disabled
 public class BaseControllerTest {
 
   @Autowired

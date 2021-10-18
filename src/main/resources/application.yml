@@ -16,18 +16,19 @@ my-app:
   client-secret: pass
 ---
 spring:
-  profiles: test
+  config:
+    activate:
+      on-profile: local
   jpa:
     properties:
       hibernate:
-        jdbc.lob.non_contextual_creation: true
         format_sql: true
     hibernate:
       ddl-auto: create
   datasource:
     username: sa
     password:
-    url: jdbc:h2:mem:testdb
+    url: jdbc:h2:tcp://localhost/~/restapi
 
 logging:
   level:
@@ -36,7 +37,9 @@ logging:
 
 ---
 spring:
-  profiles: dev
+  config:
+    activate:
+      on-profile: dev
   jpa:
     properties:
       hibernate:
@@ -60,14 +63,23 @@ logging:
 
 ---
 spring:
-  profiles: test
+  config:
+    activate:
+      on-profile: test
   jpa:
-#    show-sql: true
     properties:
       hibernate:
         format_sql: true
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: create
+  datasource:
+    username: sa
+    password:
+    url: jdbc:h2:mem:testdb
+  output:
+    ansi:
+      enabled: detect
+
 logging:
   level:
     org.hibernate.SQL: debug

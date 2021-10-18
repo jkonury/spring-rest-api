@@ -1,6 +1,6 @@
 plugins {
-  id 'org.springframework.boot' version '2.3.0.RELEASE'
-  id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+  id 'org.springframework.boot' version '2.5.5'
+  id 'io.spring.dependency-management' version '1.0.11.RELEASE'
   id "org.asciidoctor.convert" version "2.4.0"
   id 'jacoco'
   id 'java'
@@ -32,9 +32,9 @@ dependencies {
   implementation 'org.springframework.boot:spring-boot-starter-hateoas'
   implementation 'org.springframework.boot:spring-boot-starter-web'
   implementation 'org.springframework.boot:spring-boot-starter-security'
-  implementation 'org.modelmapper:modelmapper:2.4.1'
+  implementation 'org.modelmapper:modelmapper:2.4.4'
 
-  implementation 'org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:2.2.13.RELEASE'
+  implementation 'org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:2.5.5'
   implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.7.1'
   developmentOnly('org.springframework.boot:spring-boot-devtools')
   runtimeOnly('com.h2database:h2')
@@ -43,7 +43,7 @@ dependencies {
   testImplementation('org.springframework.boot:spring-boot-starter-test')
   testImplementation('org.springframework.restdocs:spring-restdocs-mockmvc')
   testImplementation 'org.springframework.security:spring-security-test'
-  testImplementation 'nl.jqno.equalsverifier:equalsverifier:3.6'
+  testImplementation 'nl.jqno.equalsverifier:equalsverifier:3.7.2'
 
   annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
   asciidoctor "org.springframework.restdocs:spring-restdocs-asciidoctor"
