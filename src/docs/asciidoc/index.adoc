@@ -8,6 +8,10 @@
 :sectlinks:
 :operation-curl-request-title: Example request
 :operation-http-response-title: Example response
+ifndef::snippets[]
+:snippets: ./build/generated-snippets
+endif::[]
+
 
 [[overview]]
 = 개요
@@ -92,7 +96,7 @@ include::{snippets}/errors/http-response.adoc[]
 
 `GET` 요청을 사용하여 인덱스에 접근할 수 있다.
 
-operation::index[snippets='response-body,http-response,links']
+// include::index[snippets='response-body,http-response,links']
 
 [[resources-events]]
 == 이벤트
@@ -104,25 +108,48 @@ operation::index[snippets='response-body,http-response,links']
 
 `GET` 요청을 사용하여 서비스의 모든 이벤트를 조회할 수 있다.
 
-operation::get-events[snippets='response-fields,curl-request,http-response,links']
+include::{snippets}/query-events/curl-request.adoc[]
+include::{snippets}/query-events/http-request.adoc[]
+include::{snippets}/query-events/httpie-request.adoc[]
+include::{snippets}/query-events/http-response.adoc[]
 
 [[resources-events-create]]
 === 이벤트 생성
 
 `POST` 요청을 사용해서 새 이벤트를 만들 수 있다.
 
-operation::create-event[snippets='request-fields,curl-request,http-request,request-headers,http-response,response-headers,response-fields,links']
+include::{snippets}/create-event/request-fields.adoc[]
+include::{snippets}/create-event/curl-request.adoc[]
+include::{snippets}/create-event/http-request.adoc[]
+include::{snippets}/create-event/httpie-request.adoc[]
+include::{snippets}/create-event/request-headers.adoc[]
+include::{snippets}/create-event/http-response.adoc[]
+include::{snippets}/create-event/response-headers.adoc[]
+include::{snippets}/create-event/response-fields.adoc[]
+include::{snippets}/create-event/links.adoc[]
+
 
 [[resources-events-get]]
 === 이벤트 조회
 
 `Get` 요청을 사용해서 기존 이벤트 하나를 조회할 수 있다.
 
-operation::get-event[snippets='request-fields,curl-request,http-response,links']
+include::{snippets}/get-event/curl-request.adoc[]
+include::{snippets}/get-event/http-request.adoc[]
+include::{snippets}/get-event/httpie-request.adoc[]
+include::{snippets}/get-event/http-response.adoc[]
 
 [[resources-events-update]]
 === 이벤트 수정
 
 `PUT` 요청을 사용해서 기존 이벤트를 수정할 수 있다.
 
-operation::update-event[snippets='request-fields,curl-request,http-response,links']
+include::{snippets}/update-event/request-fields.adoc[]
+include::{snippets}/update-event/curl-request.adoc[]
+include::{snippets}/update-event/http-request.adoc[]
+include::{snippets}/update-event/httpie-request.adoc[]
+include::{snippets}/update-event/request-headers.adoc[]
+include::{snippets}/update-event/http-response.adoc[]
+include::{snippets}/update-event/response-headers.adoc[]
+include::{snippets}/update-event/response-fields.adoc[]
+include::{snippets}/update-event/links.adoc[]

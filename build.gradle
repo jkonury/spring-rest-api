@@ -1,7 +1,7 @@
 plugins {
   id 'org.springframework.boot' version '2.7.2'
   id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-  id "org.asciidoctor.convert" version "1.5.8"
+  id 'org.asciidoctor.jvm.convert' version '3.3.2'
   id 'jacoco'
   id 'java'
 }
@@ -21,6 +21,7 @@ configurations {
 }
 
 repositories {
+  mavenLocal()
   mavenCentral()
 }
 
@@ -46,7 +47,6 @@ dependencies {
   testImplementation 'nl.jqno.equalsverifier:equalsverifier:3.10'
 
   annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
-  asciidoctor "org.springframework.restdocs:spring-restdocs-asciidoctor"
 }
 
 compileJava {
@@ -63,6 +63,7 @@ test {
   outputs.dir snippetsDir
   finalizedBy jacocoTestReport // report is always generated after tests run
 }
+
 
 jacocoTestReport {
   reports {
@@ -139,16 +140,11 @@ asciidoctor {
   dependsOn test
 }
 
-task copyDocument(type: Copy) {
-  dependsOn asciidoctor
-
-  from file('build/asciidoc/html5/')
-  into file('src/main/resources/static/docs')
-  into file('build/resources/main/static/docs')
-}
-
-build {
-  dependsOn copyDocument
+asciidoctor.doLast {
+  copy {
+    from 'build/docs/asciidoc'
+    into 'src/main/resources/static/docs'
+  }
 }
 
 compileJava.dependsOn(processResources)
