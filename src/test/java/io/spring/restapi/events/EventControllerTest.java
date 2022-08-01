@@ -80,10 +80,10 @@ public class EventControllerTest extends BaseControllerTest {
     EventDto event = EventDto.builder()
       .name("Spring")
       .description("REST API Development with Spring")
-      .beginEnrollmentDateTime(LocalDateTime.of(2018, 11, 23, 14, 21))
-      .closeEnrollmentDateTime(LocalDateTime.of(2018, 11, 24, 14, 21))
-      .beginEventDateTime(LocalDateTime.of(2018, 11, 25, 14, 21))
-      .endEventDateTime(LocalDateTime.of(2018, 11, 26, 14, 21))
+      .beginEnrollmentDateTime(LocalDateTime.now().plusDays(1))
+      .closeEnrollmentDateTime(LocalDateTime.now().plusDays(2))
+      .beginEventDateTime(LocalDateTime.now().plusDays(7))
+      .endEventDateTime(LocalDateTime.now().plusDays(8))
       .basePrice(100)
       .maxPrice(200)
       .limitOfEnrollment(100)
@@ -168,10 +168,10 @@ public class EventControllerTest extends BaseControllerTest {
       .id(10L)
       .name("Spring")
       .description("REST API Development with Spring")
-      .beginEnrollmentDateTime(LocalDateTime.of(2018, 11, 23, 14, 21))
-      .closeEnrollmentDateTime(LocalDateTime.of(2018, 11, 24, 14, 21))
-      .beginEventDateTime(LocalDateTime.of(2018, 11, 25, 14, 21))
-      .endEventDateTime(LocalDateTime.of(2018, 11, 26, 14, 21))
+      .beginEnrollmentDateTime(LocalDateTime.now().minusDays(1))
+      .closeEnrollmentDateTime(LocalDateTime.now().plusDays(2))
+      .beginEventDateTime(LocalDateTime.now().plusDays(7))
+      .endEventDateTime(LocalDateTime.now().plusDays(8))
       .basePrice(100)
       .maxPrice(200)
       .limitOfEnrollment(100)
@@ -200,7 +200,7 @@ public class EventControllerTest extends BaseControllerTest {
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaTypes.HAL_JSON)
         .content(objectMapper.writeValueAsString(eventDto)))
-      .andExpect(status().isInternalServerError());
+      .andExpect(status().isBadRequest());
   }
 
   @Test
@@ -208,16 +208,15 @@ public class EventControllerTest extends BaseControllerTest {
   public void createEvent_BadRequest_Wrong_Input() throws Exception {
 
     EventDto event = EventDto.builder()
-      .name("Spring")
-      .description("REST API Development with Spring")
-      .beginEnrollmentDateTime(LocalDateTime.of(2018, 11, 25, 14, 21))
-      .closeEnrollmentDateTime(LocalDateTime.of(2018, 11, 24, 14, 21))
-      .beginEventDateTime(LocalDateTime.of(2018, 11, 27, 14, 21))
-      .endEventDateTime(LocalDateTime.of(2018, 11, 26, 14, 21))
-      .basePrice(10000)
-      .maxPrice(200)
-      .limitOfEnrollment(100)
-      .location("Seoul")
+      .name("")
+      .description("")
+      .beginEnrollmentDateTime(LocalDateTime.now().minusDays(1))
+      .closeEnrollmentDateTime(LocalDateTime.now().minusDays(2))
+      .beginEventDateTime(LocalDateTime.now().minusDays(7))
+      .endEventDateTime(LocalDateTime.now().minusDays(8))
+      .basePrice(-10000)
+      .maxPrice(-200)
+      .limitOfEnrollment(-100)
       .build();
 
     mockMvc.perform(post("/api/events")
@@ -226,7 +225,25 @@ public class EventControllerTest extends BaseControllerTest {
         .accept(MediaTypes.HAL_JSON)
         .content(objectMapper.writeValueAsString(event)))
       .andDo(print())
-      .andExpect(status().isInternalServerError());
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("errors").exists())
+      .andExpect(jsonPath("errors[0].field").exists())
+      .andExpect(jsonPath("errors[0].objectName").exists())
+      .andExpect(jsonPath("errors[0].code").exists())
+      .andExpect(jsonPath("errors[0].defaultMessage").exists())
+      .andExpect(jsonPath("errors[0].rejectedValue").exists())
+      .andDo(document("errors",
+                      responseFields(
+                        fieldWithPath("errors").description("error array"),
+                        fieldWithPath("errors[0].field").description("error field"),
+                        fieldWithPath("errors[0].objectName").description("error objectName"),
+                        fieldWithPath("errors[0].code").description("error code"),
+                        fieldWithPath("errors[0].defaultMessage").description("error defaultMessage"),
+                        fieldWithPath("errors[0].rejectedValue").description("error rejectedValue"),
+                        fieldWithPath("_links.index.href").description("link to index")
+                      )
+      ));
+
   }
 
   private String getAccessToken() throws Exception {
@@ -444,8 +461,7 @@ public class EventControllerTest extends BaseControllerTest {
         .accept(MediaTypes.HAL_JSON)
         .content(objectMapper.writeValueAsString(eventDto)))
       .andDo(print())
-      .andExpect(status().isNotFound())
-    ;
+      .andExpect(status().isNotFound());
   }
 
   @Test
@@ -483,7 +499,7 @@ public class EventControllerTest extends BaseControllerTest {
         .accept(MediaTypes.HAL_JSON)
         .content(objectMapper.writeValueAsString(eventDto)))
       .andDo(print())
-      .andExpect(status().isInternalServerError())
+      .andExpect(status().isBadRequest())
     ;
   }
 
@@ -492,10 +508,10 @@ public class EventControllerTest extends BaseControllerTest {
     Event event = Event.builder()
       .name("event " + index)
       .description("test event")
-      .beginEnrollmentDateTime(LocalDateTime.of(2018, 11, 23, 14, 21))
-      .closeEnrollmentDateTime(LocalDateTime.of(2018, 11, 24, 14, 21))
-      .beginEventDateTime(LocalDateTime.of(2018, 11, 25, 14, 21))
-      .endEventDateTime(LocalDateTime.of(2018, 11, 26, 14, 21))
+      .beginEnrollmentDateTime(LocalDateTime.now().plusDays(1))
+      .closeEnrollmentDateTime(LocalDateTime.now().plusDays(2))
+      .beginEventDateTime(LocalDateTime.now().plusDays(7))
+      .endEventDateTime(LocalDateTime.now().plusDays(8))
       .basePrice(100)
       .maxPrice(200)
       .limitOfEnrollment(100)

@@ -1,9 +1,9 @@
 package io.spring.restapi.events;
 
 import java.time.LocalDateTime;
+import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,13 +21,13 @@ public class EventDto {
   private String name;
   @NotEmpty
   private String description;
-  @NotNull
+  @FutureOrPresent
   private LocalDateTime beginEnrollmentDateTime;
-  @NotNull
+  @FutureOrPresent
   private LocalDateTime closeEnrollmentDateTime;
-  @NotNull
+  @FutureOrPresent
   private LocalDateTime beginEventDateTime;
-  @NotNull
+  @FutureOrPresent
   private LocalDateTime endEventDateTime;
   private String location; // (optional) 이게 없으면 온라인 모임
   @Min(0)
