@@ -3,25 +3,24 @@ package io.spring.restapi.events;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.spring.restapi.accounts.Account;
 import io.spring.restapi.accounts.AccountSerializer;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
+import org.hibernate.Hibernate;
 
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = "id")
 @Builder
 @Entity
 public class Event {
@@ -54,5 +53,22 @@ public class Event {
     this.free = this.basePrice == 0 && this.maxPrice == 0;
     // Update offline
     this.offline = this.location != null && !this.location.isBlank();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
+      return false;
+    }
+    Event event = (Event) o;
+    return id != null && Objects.equals(id, event.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return getClass().hashCode();
   }
 }

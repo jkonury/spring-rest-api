@@ -26,9 +26,7 @@ spring:
     hibernate:
       ddl-auto: create
   datasource:
-    username: sa
-    password:
-    url: jdbc:h2:tcp://localhost/~/restapi
+    url: jdbc:h2:mem:test;DB_CLOSE_DELAY=-1
 
 logging:
   level:

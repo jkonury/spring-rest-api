@@ -4,11 +4,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import io.spring.restapi.accounts.Account;
-import io.spring.restapi.accounts.CurrentUser;
+import io.spring.restapi.accounts.AccountRepository;
 import io.spring.restapi.index.IndexController;
+import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.Optional;
-import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -20,10 +20,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,15 +37,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class EventController {
 
   private final EventRepository eventRepository;
+  private final AccountRepository accountRepository;
   private final ModelMapper modelMapper;
   private final EventValidator eventValidator;
 
   @PostMapping
-  public ResponseEntity createEvent(@RequestBody @Valid EventDto eventDto,
-                                    Errors errors,
-                                    @CurrentUser Account account) {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    log.info("{}", authentication);
+  public ResponseEntity<?> createEvent(@RequestBody @Valid EventDto eventDto,
+                                    Errors errors) {
 
     if (errors.hasErrors() || !eventValidator.validate(eventDto, errors)) {
       errors.getAllErrors().forEach(e -> log.error("{} : {}", e.getCode(), e.getDefaultMessage()));
@@ -59,8 +54,10 @@ public class EventController {
 
     Event event = modelMapper.map(eventDto, Event.class);
     event.update();
-    event.setManager(account);
+
+    final Account account = accountRepository.findByEmail("user@email.com").orElseThrow(() -> new RuntimeException("Not found account"));
     Event newEvent = eventRepository.save(event);
+    event.setManager(account);
     final WebMvcLinkBuilder selfLinkBuilder = linkTo(EventController.class).slash(newEvent.getId());
     final URI createUri = selfLinkBuilder.toUri();
 
@@ -74,8 +71,7 @@ public class EventController {
 
   @GetMapping
   public ResponseEntity<PagedModel<EntityModel<Event>>> queryEvents(Pageable pageable,
-                                    PagedResourcesAssembler<Event> assembler,
-                                    @CurrentUser Account account) {
+                                    PagedResourcesAssembler<Event> assembler) {
 
     Page<Event> page = eventRepository.findAll(pageable);
     PagedModel<EntityModel<Event>> pagedResources = assembler.toModel(page, event -> {
@@ -84,18 +80,14 @@ public class EventController {
       return eventResource;
     });
 
-    if (account != null) {
-      pagedResources.add(linkTo(EventController.class).withRel("create-event"));
-    }
-
+    pagedResources.add(linkTo(EventController.class).withRel("create-event"));
     pagedResources.add(Link.of("/docs/index.html#resources-events-list").withRel("profile"));
 
     return ResponseEntity.ok(pagedResources);
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity getEvent(@PathVariable Long id,
-                                 @CurrentUser Account account) {
+  public ResponseEntity<?> getEvent(@PathVariable Long id) {
     Optional<Event> optionalEvent = eventRepository.findById(id);
     if (optionalEvent.isEmpty()) {
       return ResponseEntity.notFound().build();
@@ -106,18 +98,15 @@ public class EventController {
     eventResource.add(linkTo(EventController.class).slash(event.getId()).withSelfRel());
     eventResource.add(Link.of("/docs/index.html#resources-events-get").withRel("profile"));
 
-    if (event.getManager().equals(account)) {
-      eventResource.add(linkTo(EventController.class).slash(event.getId()).withRel("update-event"));
-    }
+    eventResource.add(linkTo(EventController.class).slash(event.getId()).withRel("update-event"));
 
     return ResponseEntity.ok(eventResource);
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity updateEvent(@PathVariable Long id,
+  public ResponseEntity<?> updateEvent(@PathVariable Long id,
                                     @RequestBody @Valid EventDto eventDto,
-                                    Errors errors,
-                                    @CurrentUser Account account) {
+                                    Errors errors) {
     if (errors.hasErrors() || !eventValidator.validate(eventDto, errors)) {
       errors.getAllErrors().forEach(e -> log.error("{} : {}", e.getCode(), e.getDefaultMessage()));
       final EntityModel<Errors> errorResource = EntityModel.of(errors);
@@ -131,9 +120,9 @@ public class EventController {
     }
 
     Event existingEvent = optionalEvent.get();
-    if (!existingEvent.getManager().equals(account)) {
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    }
+//    if (!existingEvent.getManager().equals(account)) {
+//      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+//    }
 
     modelMapper.map(eventDto, existingEvent);
     Event event = eventRepository.save(existingEvent);

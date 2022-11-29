@@ -26,45 +26,6 @@ public class AccountServiceTest {
   @Autowired
   AccountRepository accountRepository;
 
-  @Autowired
-  PasswordEncoder passwordEncoder;
-
-  @Test
-  public void findByUsername() {
-    // given
-    final String email = "test@email.com";
-    final String password = "password";
-
-    final Account account = Account.builder()
-      .email(email)
-      .password(password)
-      .roles(Set.of(ADMIN, USER))
-      .build();
-
-    accountService.saveAccount(account);
-
-    // when
-    final UserDetails userDetails = accountService.loadUserByUsername(email);
-
-    // then
-    assertThat(passwordEncoder.matches(password, userDetails.getPassword())).isTrue();
-  }
-
-  @Test
-  public void findByUsernameFail() {
-    assertThrows(UsernameNotFoundException.class, () -> {
-      accountService.loadUserByUsername("");
-    });
-
-  }
-
-  @Test
-  public void expectedExceptionTest() {
-    final String username = "test@mail.com";
-    assertThrows(UsernameNotFoundException.class, () -> {
-      accountService.loadUserByUsername("");
-    }, username);
-  }
 
   @Test
   public void equalsAccount() {
