@@ -14,10 +14,11 @@ public class EventTest {
 
   @Test
   public void builder() {
-    final Event event = Event.builder()
-      .name("Spring REST API")
-      .description("REST API development with Spring")
-      .build();
+    final Event event =
+        Event.builder()
+            .name("Spring REST API")
+            .description("REST API development with Spring")
+            .build();
     assertThat(event).isNotNull();
   }
 
@@ -38,10 +39,7 @@ public class EventTest {
   @MethodSource("parametersForTestFree")
   public void testFree(int basePrice, int maxPrice, boolean isFree) {
     // Given
-    Event event = Event.builder()
-      .basePrice(basePrice)
-      .maxPrice(maxPrice)
-      .build();
+    Event event = Event.builder().basePrice(basePrice).maxPrice(maxPrice).build();
 
     // When
     event.update();
@@ -54,9 +52,7 @@ public class EventTest {
   @MethodSource("parametersForTestOffline")
   public void testOffline(String location, boolean isOffline) {
     // Given
-    Event event = Event.builder()
-      .location(location)
-      .build();
+    Event event = Event.builder().location(location).build();
 
     // When
     event.update();
@@ -67,35 +63,21 @@ public class EventTest {
 
   @Test
   public void equalsEvent() {
-    EqualsVerifier
-      .forClass(Event.class)
-      .suppress(Warning.SURROGATE_KEY)
-      .verify();
+    EqualsVerifier.forClass(Event.class).suppress(Warning.SURROGATE_KEY).verify();
   }
 
   @Test
   public void simpleEqualsEvent() {
-    EqualsVerifier
-      .simple()
-      .forClass(Event.class)
-      .suppress(Warning.SURROGATE_KEY)
-      .verify();
+    EqualsVerifier.simple().forClass(Event.class).suppress(Warning.SURROGATE_KEY).verify();
   }
 
   private static Stream<Arguments> parametersForTestFree() {
     return Stream.of(
-      Arguments.of(0, 0, true),
-      Arguments.of(100, 0, false),
-      Arguments.of(0, 100, false)
-    );
+        Arguments.of(0, 0, true), Arguments.of(100, 0, false), Arguments.of(0, 100, false));
   }
 
   private static Stream<Arguments> parametersForTestOffline() {
     return Stream.of(
-      Arguments.of("강남", true),
-      Arguments.of(null, false),
-      Arguments.of("       ", false)
-
-    );
+        Arguments.of("강남", true), Arguments.of(null, false), Arguments.of("       ", false));
   }
 }

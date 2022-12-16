@@ -22,12 +22,9 @@ import org.springframework.test.web.servlet.MockMvc;
 @Disabled
 public class BaseControllerTest {
 
-  @Autowired
-  protected MockMvc mockMvc;
+  @Autowired protected MockMvc mockMvc;
 
-  @Autowired
-  protected ObjectMapper objectMapper;
+  @Autowired protected ObjectMapper objectMapper;
 
-  @Autowired
-  protected ModelMapper modelMapper;
+  @Autowired protected ModelMapper modelMapper;
 }

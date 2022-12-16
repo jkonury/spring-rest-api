@@ -20,14 +20,11 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class AccountServiceTest {
 
-  @Autowired
-  AccountService accountService;
+  @Autowired AccountService accountService;
 
-  @Autowired
-  AccountRepository accountRepository;
+  @Autowired AccountRepository accountRepository;
 
-  @Autowired
-  PasswordEncoder passwordEncoder;
+  @Autowired PasswordEncoder passwordEncoder;
 
   @Test
   public void findByUsername() {
@@ -35,11 +32,8 @@ public class AccountServiceTest {
     final String email = "test@email.com";
     final String password = "password";
 
-    final Account account = Account.builder()
-      .email(email)
-      .password(password)
-      .roles(Set.of(ADMIN, USER))
-      .build();
+    final Account account =
+        Account.builder().email(email).password(password).roles(Set.of(ADMIN, USER)).build();
 
     accountService.saveAccount(account);
 
@@ -52,34 +46,31 @@ public class AccountServiceTest {
 
   @Test
   public void findByUsernameFail() {
-    assertThrows(UsernameNotFoundException.class, () -> {
-      accountService.loadUserByUsername("");
-    });
-
+    assertThrows(
+        UsernameNotFoundException.class,
+        () -> {
+          accountService.loadUserByUsername("");
+        });
   }
 
   @Test
   public void expectedExceptionTest() {
     final String username = "test@mail.com";
-    assertThrows(UsernameNotFoundException.class, () -> {
-      accountService.loadUserByUsername("");
-    }, username);
+    assertThrows(
+        UsernameNotFoundException.class,
+        () -> {
+          accountService.loadUserByUsername("");
+        },
+        username);
   }
 
   @Test
   public void equalsAccount() {
-    EqualsVerifier
-      .forClass(Account.class)
-      .suppress(Warning.SURROGATE_KEY)
-      .verify();
+    EqualsVerifier.forClass(Account.class).suppress(Warning.SURROGATE_KEY).verify();
   }
 
   @Test
   public void simpleEqualsAccount() {
-    EqualsVerifier
-      .simple()
-      .forClass(Account.class)
-      .suppress(Warning.SURROGATE_KEY)
-      .verify();
+    EqualsVerifier.simple().forClass(Account.class).suppress(Warning.SURROGATE_KEY).verify();
   }
 }

@@ -8,7 +8,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -22,8 +21,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Account {
 
-  @Id @GeneratedValue
-  private Long id;
+  @Id @GeneratedValue private Long id;
   private String email;
   private String password;
 

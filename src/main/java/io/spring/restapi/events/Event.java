@@ -16,9 +16,9 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
@@ -26,8 +26,7 @@ import lombok.ToString;
 @Entity
 public class Event {
 
-  @Id @GeneratedValue
-  private Long id;
+  @Id @GeneratedValue private Long id;
   private String name;
   private String description;
   private LocalDateTime beginEnrollmentDateTime;

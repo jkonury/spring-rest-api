@@ -19,7 +19,7 @@ public class AccountAdapter extends User {
 
   private static Collection<? extends GrantedAuthority> authorities(Set<AccountRole> roles) {
     return roles.stream()
-            .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
-            .collect(Collectors.toSet());
+        .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
+        .collect(Collectors.toSet());
   }
 }

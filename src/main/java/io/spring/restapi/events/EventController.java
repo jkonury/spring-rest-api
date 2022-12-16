@@ -44,9 +44,8 @@ public class EventController {
   private final EventValidator eventValidator;
 
   @PostMapping
-  public ResponseEntity createEvent(@RequestBody @Valid EventDto eventDto,
-                                    Errors errors,
-                                    @CurrentUser Account account) {
+  public ResponseEntity createEvent(
+      @RequestBody @Valid EventDto eventDto, Errors errors, @CurrentUser Account account) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     log.info("{}", authentication);
 
@@ -73,16 +72,18 @@ public class EventController {
   }
 
   @GetMapping
-  public ResponseEntity<PagedModel<EntityModel<Event>>> queryEvents(Pageable pageable,
-                                    PagedResourcesAssembler<Event> assembler,
-                                    @CurrentUser Account account) {
+  public ResponseEntity<PagedModel<EntityModel<Event>>> queryEvents(
+      Pageable pageable, PagedResourcesAssembler<Event> assembler, @CurrentUser Account account) {
 
     Page<Event> page = eventRepository.findAll(pageable);
-    PagedModel<EntityModel<Event>> pagedResources = assembler.toModel(page, event -> {
-      final EntityModel<Event> eventResource = EntityModel.of(event);
-      eventResource.add(linkTo(EventController.class).slash(event.getId()).withSelfRel());
-      return eventResource;
-    });
+    PagedModel<EntityModel<Event>> pagedResources =
+        assembler.toModel(
+            page,
+            event -> {
+              final EntityModel<Event> eventResource = EntityModel.of(event);
+              eventResource.add(linkTo(EventController.class).slash(event.getId()).withSelfRel());
+              return eventResource;
+            });
 
     if (account != null) {
       pagedResources.add(linkTo(EventController.class).withRel("create-event"));
@@ -94,8 +95,7 @@ public class EventController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity getEvent(@PathVariable Long id,
-                                 @CurrentUser Account account) {
+  public ResponseEntity getEvent(@PathVariable Long id, @CurrentUser Account account) {
     Optional<Event> optionalEvent = eventRepository.findById(id);
     if (optionalEvent.isEmpty()) {
       return ResponseEntity.notFound().build();
@@ -114,17 +114,18 @@ public class EventController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity updateEvent(@PathVariable Long id,
-                                    @RequestBody @Valid EventDto eventDto,
-                                    Errors errors,
-                                    @CurrentUser Account account) {
+  public ResponseEntity updateEvent(
+      @PathVariable Long id,
+      @RequestBody @Valid EventDto eventDto,
+      Errors errors,
+      @CurrentUser Account account) {
     if (errors.hasErrors() || !eventValidator.validate(eventDto, errors)) {
       errors.getAllErrors().forEach(e -> log.error("{} : {}", e.getCode(), e.getDefaultMessage()));
       final EntityModel<Errors> errorResource = EntityModel.of(errors);
       errorResource.add(linkTo(methodOn(IndexController.class).index()).withRel("index"));
       return ResponseEntity.badRequest().body(errorResource);
     }
-    
+
     Optional<Event> optionalEvent = eventRepository.findById(id);
     if (optionalEvent.isEmpty()) {
       return ResponseEntity.notFound().build();

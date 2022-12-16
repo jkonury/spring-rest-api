@@ -8,24 +8,19 @@ import org.springframework.stereotype.Component;
 
 @Component
 @ConfigurationProperties(prefix = "my-app")
-@Getter @Setter
+@Getter
+@Setter
 public class AppProperties {
 
-  @NotEmpty
-  private String adminEmail;
+  @NotEmpty private String adminEmail;
 
-  @NotEmpty
-  private String adminPassword;
+  @NotEmpty private String adminPassword;
 
-  @NotEmpty
-  private String userEmail;
+  @NotEmpty private String userEmail;
 
-  @NotEmpty
-  private String userPassword;
+  @NotEmpty private String userPassword;
 
-  @NotEmpty
-  private String clientId;
+  @NotEmpty private String clientId;
 
-  @NotEmpty
-  private String clientSecret;
+  @NotEmpty private String clientSecret;
 }

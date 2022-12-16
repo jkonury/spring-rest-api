@@ -33,22 +33,20 @@ public class AppConfig {
   public ApplicationRunner applicationRunner() {
     return new ApplicationRunner() {
 
-      @Autowired
-      AccountService accountService;
+      @Autowired AccountService accountService;
 
-      @Autowired
-      AccountRepository accountRepository;
+      @Autowired AccountRepository accountRepository;
 
-      @Autowired
-      AppProperties appProperties;
+      @Autowired AppProperties appProperties;
 
       @Override
       public void run(ApplicationArguments args) {
-        final Account admin = Account.builder()
-          .email(appProperties.getAdminEmail())
-          .password(appProperties.getAdminPassword())
-          .roles(Set.of(AccountRole.ADMIN, AccountRole.USER))
-          .build();
+        final Account admin =
+            Account.builder()
+                .email(appProperties.getAdminEmail())
+                .password(appProperties.getAdminPassword())
+                .roles(Set.of(AccountRole.ADMIN, AccountRole.USER))
+                .build();
 
         Optional<Account> findAccount = accountRepository.findByEmail(admin.getEmail());
 
@@ -56,11 +54,12 @@ public class AppConfig {
           accountService.saveAccount(admin);
         }
 
-        final Account user = Account.builder()
-          .email(appProperties.getUserEmail())
-          .password(appProperties.getUserPassword())
-          .roles(Set.of(AccountRole.USER))
-          .build();
+        final Account user =
+            Account.builder()
+                .email(appProperties.getUserEmail())
+                .password(appProperties.getUserPassword())
+                .roles(Set.of(AccountRole.USER))
+                .build();
 
         findAccount = accountRepository.findByEmail(user.getEmail());
 
